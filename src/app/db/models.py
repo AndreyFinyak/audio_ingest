@@ -3,16 +3,18 @@ from datetime import datetime
 from enum import Enum
 
 from sqlalchemy import (
-    func,
-    TIMESTAMP,
-    String,
-    Integer,
-    Enum as EnumORM,
-    ForeignKey,
-    Float,
     JSON,
+    TIMESTAMP,
+)
+from sqlalchemy import Enum as EnumORM
+from sqlalchemy import (
+    Float,
+    ForeignKey,
+    Integer,
+    String,
     Text,
     UniqueConstraint,
+    func,
 )
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
@@ -59,8 +61,7 @@ class Upload(Base):
     error_message: Mapped[str | None] = mapped_column(Text)
     created_at: Mapped[datetime] = mapped_column(default=func.now)
     updated_at: Mapped[datetime] = mapped_column(
-        default=func.now,
-        onupdate=func.now
+        default=func.now, onupdate=func.now
     )
 
     jobs: Mapped[list["Job"]] = relationship(
@@ -89,12 +90,9 @@ class Job(Base):
     upload_id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True),
         ForeignKey("uploads.id", ondelete="CASCADE"),
-        nullable=False
+        nullable=False,
     )
-    type: Mapped[str] = mapped_column(
-        Text,
-        nullable=False
-    )
+    type: Mapped[str] = mapped_column(Text, nullable=False)
     status: Mapped[JobStatusEnum] = mapped_column(
         EnumORM,
         nullable=False,
@@ -104,9 +102,7 @@ class Job(Base):
     last_error: Mapped[str | None] = mapped_column(Text)
     created_at: Mapped[datetime] = mapped_column(default=func.now)
     updated_at: Mapped[datetime] = mapped_column(
-        TIMESTAMP,
-        default=func.now,
-        onupdate=func.now
+        TIMESTAMP, default=func.now, onupdate=func.now
     )
 
     upload: Mapped["Upload"] = relationship(back_populates="jobs")
@@ -134,7 +130,7 @@ class AudioFile(Base):
     upload_id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True),
         ForeignKey("uploads.id", ondelete="CASCADE"),
-        nullable=False
+        nullable=False,
     )
     file_path: Mapped[str] = mapped_column(String(512), nullable=False)
     duration_s: Mapped[float] = mapped_column(Float)
@@ -167,7 +163,7 @@ class Segment(Base):
     audio_id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True),
         ForeignKey("audio_files.id", ondelete="CASCADE"),
-        nullable=False
+        nullable=False,
     )
     start_ms: Mapped[int] = mapped_column(Integer, nullable=False)
     end_ms: Mapped[int] = mapped_column(Integer, nullable=False)

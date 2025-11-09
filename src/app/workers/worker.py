@@ -1,23 +1,23 @@
 import asyncio
-import aiofiles
 import io
 import logging
 import wave
 
+import aiofiles
 import numpy as np
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.config import worker_settings
+from app.db.database import connection
 from app.db.models import (
-    Job,
-    Upload,
     AudioFile,
+    Job,
+    JobStatusEnum,
     Segment,
     StatusUploadEnum,
-    JobStatusEnum,
+    Upload,
 )
-from app.db.database import connection
-from app.core.config import worker_settings
 
 logger = logging.getLogger(__name__)
 
@@ -85,9 +85,7 @@ class Worker:
 
         loop = asyncio.get_running_loop()
         meta, segments = await loop.run_in_executor(
-            None,
-            analyze_audio_bytes,
-            wav_bytes
+            None, analyze_audio_bytes, wav_bytes
         )
 
         # создаём AudioFile
@@ -123,10 +121,7 @@ class Worker:
 
     @connection
     async def _handle_failure(
-        self,
-        job: Job,
-        error: str,
-        session: AsyncSession
+        self, job: Job, error: str, session: AsyncSession
     ) -> None:
         """Обработка ошибок, экспоненциальная задержка."""
         job.last_error = error
@@ -138,11 +133,11 @@ class Worker:
             logger.error(
                 "Job %s failed permanently after %s attempts",
                 job.id,
-                job.attempts
+                job.attempts,
             )
         else:
             job.status = JobStatusEnum.queued
-            delay = RETRY_BASE_DELAY * (2 ** job.attempts)
+            delay = RETRY_BASE_DELAY * (2**job.attempts)
             logger.warning("Retrying job %s in %ss", job.id, delay)
             await asyncio.sleep(delay)
         await session.commit()
@@ -169,7 +164,7 @@ def analyze_audio_bytes(raw_bytes: bytes) -> tuple[dict, list[dict]]:
     seg_start = 0
 
     for i in range(0, len(audio), window_size):
-        window = audio[i: i + window_size]
+        window = audio[i : i + window_size]
         if len(window) == 0:
             continue
         rms = float(np.sqrt(np.mean(window**2)))

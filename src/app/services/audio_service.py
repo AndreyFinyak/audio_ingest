@@ -1,10 +1,11 @@
-import os
 import logging
+import os
+
 from sqlalchemy import select
 
 from app.db.database import connection
-from app.db.models import Upload, AudioFile, Segment
-from app.schemas import UploadRead, AudioFileRead
+from app.db.models import AudioFile, Segment, Upload
+from app.schemas import AudioFileRead, UploadRead
 
 logger = logging.getLogger(__name__)
 
@@ -27,9 +28,7 @@ class AudioService:
 
     @connection
     async def get_audio_info(
-        self,
-        upload_id: str,
-        session
+        self, upload_id: int, session
     ) -> AudioFileRead | None:
         """
         Возвращает информацию об обработанном аудиофайле
@@ -53,9 +52,7 @@ class AudioService:
 
     @connection
     async def get_upload_file_path(
-        self,
-        upload_id: str,
-        session
+        self, upload_id: str, session
     ) -> str | None:
         """
         Возвращает путь к оригинальному файлу (для скачивания).
@@ -72,11 +69,7 @@ class AudioService:
         return file_path
 
     @connection
-    async def get_upload_by_id(
-        self,
-        upload_id: str,
-        session
-    ) -> Upload | None:
+    async def get_upload_by_id(self, upload_id: str, session) -> Upload | None:
         """
         Вспомогательный метод — получить Upload или None.
         """
