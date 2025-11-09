@@ -30,4 +30,6 @@ def connection(method):
             except Exception as e:
                 session.rollback()
                 raise e
+            finally:
+                await session.close()
     return wrapper

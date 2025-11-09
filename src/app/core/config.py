@@ -2,6 +2,12 @@ import logging
 from functools import lru_cache
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
+from pydantic import BaseModel
+
+
+class WorkerSettings(BaseModel):
+    MAX_ATTEMPTS: int = 3
+    RETRY_BASE_DELAY: int = 5
 
 
 class Settings(BaseSettings):
@@ -27,4 +33,10 @@ def get_settings() -> Settings:
     return Settings()  # type: ignore
 
 
+@lru_cache
+def get_worker_settings() -> WorkerSettings:
+    return WorkerSettings()
+
+
 settings = get_settings()
+worker_settings = get_worker_settings()

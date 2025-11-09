@@ -70,6 +70,12 @@ class Upload(Base):
         back_populates="upload", cascade="all, delete-orphan"
     )
 
+    def __repr__(self):
+        return (
+            f"Upload(id={self.id}, filename={self.filename},"
+            f"content_type={self.content_type}, size_bytes={self.size_bytes})"
+        )
+
 
 # ----------------------------------------------------------------------
 # Таблица jobs — очередь фоновых задач
@@ -109,6 +115,12 @@ class Job(Base):
         UniqueConstraint("upload_id", "type", name="uq_jobs_upload_type"),
     )
 
+    def __repr__(self):
+        return (
+            f"Job(id={self.id}, upload_id={self.upload_id},"
+            f"type={self.type}, status={self.status})"
+        ))
+
 
 # ----------------------------------------------------------------------
 # Таблица audio_files — итоговые файлы после обработки
@@ -138,6 +150,12 @@ class AudioFile(Base):
         back_populates="audio_file", cascade="all, delete-orphan"
     )
 
+    def __repr__(self):
+        return (
+            f"AudioFile(id={self.id}, upload_id={self.upload_id},"
+            f"file_path={self.file_path})"
+        )
+
 
 # ----------------------------------------------------------------------
 # Таблица segments — куски речи внутри файла
@@ -159,3 +177,9 @@ class Segment(Base):
     created_at: Mapped[datetime] = mapped_column(default=datetime.utcnow)
 
     audio_file: Mapped["AudioFile"] = relationship(back_populates="segments")
+
+    def __repr__(self):
+        return (
+            f"Segment(id={self.id}, audio_id={self.audio_id},"
+            f"start_ms={self.start_ms}, end_ms={self.end_ms})"
+        )
