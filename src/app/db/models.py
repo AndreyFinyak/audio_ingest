@@ -119,7 +119,7 @@ class Job(Base):
         return (
             f"Job(id={self.id}, upload_id={self.upload_id},"
             f"type={self.type}, status={self.status})"
-        ))
+        )
 
 
 # ----------------------------------------------------------------------

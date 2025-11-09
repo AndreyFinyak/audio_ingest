@@ -30,7 +30,7 @@ class Worker:
     def __init__(self, stop_event: asyncio.Event):
         self.stop_event = stop_event
 
-    async def worker_loop(self):
+    async def worker_loop(self) -> None:
         """
         Главный цикл фонового воркера.
         Запускается при старте FastAPI (через on_startup).
@@ -50,7 +50,7 @@ class Worker:
         logger.info("Worker stopped")
 
     @connection
-    async def _fetch_next_job(self, session: AsyncSession):
+    async def _fetch_next_job(self, session: AsyncSession) -> Job | None:
         """Берём одну задачу analyze со статусом queued (с блокировкой)."""
         q = (
             select(Job)
@@ -63,14 +63,14 @@ class Worker:
         if not job:
             return None
 
-        job.status = "in_progress"
+        job.status = JobStatusEnum.in_progress
         job.attempts += 1
         await session.commit()
         logger.info("Picked job %s", job.id)
         return job
 
     @connection
-    async def _process_job(self, job: Job, session: AsyncSession):
+    async def _process_job(self, job: Job, session: AsyncSession) -> None:
         """Основная логика анализа аудио."""
         upload = await session.get(Upload, job.upload_id)
         if not upload:
@@ -127,7 +127,7 @@ class Worker:
         job: Job,
         error: str,
         session: AsyncSession
-    ):
+    ) -> None:
         """Обработка ошибок, экспоненциальная задержка."""
         job.last_error = error
         if job.attempts >= MAX_ATTEMPTS:
@@ -141,14 +141,14 @@ class Worker:
                 job.attempts
             )
         else:
-            job.status = "queued"
+            job.status = JobStatusEnum.queued
             delay = RETRY_BASE_DELAY * (2 ** job.attempts)
             logger.warning("Retrying job %s in %ss", job.id, delay)
             await asyncio.sleep(delay)
         await session.commit()
 
 
-def analyze_audio_bytes(raw_bytes: bytes):
+def analyze_audio_bytes(raw_bytes: bytes) -> tuple[dict, list[dict]]:
     """
     Выполняется в отдельном потоке через run_in_executor.
     Возвращает (метаданные, список сегментов)
