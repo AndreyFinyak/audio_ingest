@@ -1,0 +1,46 @@
+services:
+  app:
+    build:
+      dockerfile: Dockerfile
+      context: ./
+    environment:
+      APP_CONFIG__DB__URL: postgresql+asyncpg://postgres:postgres@pg:5432/audio_ingest
+      APP_CONFIG__DB__ECHO: 0
+    env_file: .env.docker
+    ports:
+      - "8000:8000"
+    depends_on:
+      pg:
+        condition: service_healthy
+
+  pg:
+    image: postgres:17.3
+    environment:
+      POSTGRES_DB: test_case
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      PGDATA: /var/lib/postgresql/data
+#    ports:
+#      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready" ]
+      interval: 5s
+      timeout: 3s
+      retries: 3
+
+  pgadmin:
+    image: dpage/pgadmin4
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@admin.org
+      PGADMIN_DEFAULT_PASSWORD: admin
+      PGADMIN_CONFIG_SERVER_MODE: 'False'
+    ports:
+      - "5050:80"
+    depends_on:
+      pg:
+        condition: service_healthy
+
+volumes:
+  pgdata:
