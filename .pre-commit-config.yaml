@@ -1,0 +1,68 @@
+exclude: "^docs/|/migrations/"
+default_stages: [pre-commit]
+
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.4.0
+    hooks:
+      - id: trailing-whitespace
+        files: ^app/
+      - id: end-of-file-fixer
+        files: ^app/
+      - id: check-yaml
+        files: ^app/
+      - id: check-merge-conflict
+        files: ^app/
+      - id: detect-private-key
+        files: ^app/
+      - id: debug-statements
+        files: ^app/
+
+  - repo: https://github.com/asottile/pyupgrade
+    rev: v3.3.1
+    hooks:
+      - id: pyupgrade
+        args: [--py311-plus]
+        files: ^app/
+
+  - repo: https://github.com/PyCQA/isort
+    rev: 5.12.0
+    hooks:
+      - id: isort
+        files: ^app/
+
+  - repo: https://github.com/psf/black
+    rev: 23.1.0
+    hooks:
+      - id: black
+        exclude: ^.*\b(migrations)\b.*$
+        files: ^app/
+
+  -   repo: https://github.com/PyCQA/autoflake
+      rev: v2.0.1
+      hooks:
+      -   id: autoflake
+          files: ^app/
+
+  - repo:  https://github.com/python-jsonschema/check-jsonschema
+    rev: 0.21.0
+    hooks:
+      - id: check-github-workflows
+        files: ^\.github/workflows/.*\.ya?ml$
+      - id: check-dependabot
+        files: ^\.github/dependabot\.ya?ml$
+
+  - repo: https://github.com/pre-commit/pygrep-hooks
+    rev: v1.10.0
+    hooks:
+      - id: python-use-type-annotations
+        files: ^app/
+      - id: python-check-blanket-noqa
+        files: ^app/
+
+  -   repo: https://github.com/Yelp/detect-secrets
+      rev: v1.4.0
+      hooks:
+      -   id: detect-secrets
+          exclude: '(package\.lock\.json|alembic\.ini|migration/)'
+          files: ^app/
