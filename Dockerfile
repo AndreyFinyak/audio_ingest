@@ -12,7 +12,7 @@ COPY pyproject.toml poetry.lock ./
 RUN pip install --upgrade pip \
     && pip install poetry \
     && poetry config virtualenvs.create false \
-    && poetry install --no-root --only main
+    && poetry install --no-root
 
 # Копируем весь проект в контейнер
 COPY . /app
@@ -24,4 +24,4 @@ ENTRYPOINT [ "./prestart.sh" ]
 ENV PYTHONPATH=/app/src
 
 # Запуск приложения через Uvicorn с правильным PYTHONPATH
-CMD ["uvicorn", "src.app.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
+CMD ["uvicorn", "src.app.main:app", "--host", "0.0.0.0", "--port", "8000"]

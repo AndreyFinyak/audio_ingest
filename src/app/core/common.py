@@ -3,7 +3,7 @@ import logging
 from app.core.config import settings
 
 
-def configure_logging(level: str) -> None:
+def configure_logging() -> None:
     """Конфигурация логирования для всего приложения."""
     logging.basicConfig(
         level=settings.LOG_LEVEL,

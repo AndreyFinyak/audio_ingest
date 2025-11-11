@@ -14,7 +14,6 @@ from sqlalchemy import (
     String,
     Text,
     UniqueConstraint,
-    func,
 )
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
@@ -36,7 +35,7 @@ class JobStatusEnum(Enum):
 
 
 class Base(DeclarativeBase):
-    pass
+    __abstract__ = True
 
 
 # ----------------------------------------------------------------------
@@ -53,17 +52,16 @@ class Upload(Base):
     size_bytes: Mapped[int] = mapped_column(Integer, nullable=False)
     checksum_sha256: Mapped[str | None] = mapped_column(String(64))
     status: Mapped[StatusUploadEnum] = mapped_column(
-        EnumORM,
+        EnumORM(StatusUploadEnum),
         default="receiving",
         nullable=False,
     )
     uploaded_bytes: Mapped[int] = mapped_column(Integer, default=0)
     error_message: Mapped[str | None] = mapped_column(Text)
-    created_at: Mapped[datetime] = mapped_column(default=func.now)
+    created_at: Mapped[datetime] = mapped_column(default=datetime.utcnow)
     updated_at: Mapped[datetime] = mapped_column(
-        default=func.now, onupdate=func.now
+        default=datetime.utcnow, onupdate=datetime.utcnow
     )
-
     jobs: Mapped[list["Job"]] = relationship(
         back_populates="upload", cascade="all, delete-orphan"
     )
@@ -94,15 +92,15 @@ class Job(Base):
     )
     type: Mapped[str] = mapped_column(Text, nullable=False)
     status: Mapped[JobStatusEnum] = mapped_column(
-        EnumORM,
+        EnumORM(JobStatusEnum),
         nullable=False,
     )
     attempts: Mapped[int] = mapped_column(Integer, default=0)
     payload: Mapped[dict | None] = mapped_column(JSON)
     last_error: Mapped[str | None] = mapped_column(Text)
-    created_at: Mapped[datetime] = mapped_column(default=func.now)
+    created_at: Mapped[datetime] = mapped_column(default=datetime.utcnow)
     updated_at: Mapped[datetime] = mapped_column(
-        TIMESTAMP, default=func.now, onupdate=func.now
+        TIMESTAMP, default=datetime.utcnow, onupdate=datetime.utcnow
     )
 
     upload: Mapped["Upload"] = relationship(back_populates="jobs")
@@ -139,7 +137,7 @@ class AudioFile(Base):
     format: Mapped[str] = mapped_column(String(32))
     rms_avg: Mapped[float | None] = mapped_column(Float)
     zcr_avg: Mapped[float | None] = mapped_column(Float)
-    created_at: Mapped[datetime] = mapped_column(default=func.now)
+    created_at: Mapped[datetime] = mapped_column(default=datetime.utcnow)
 
     upload: Mapped["Upload"] = relationship(back_populates="audio_files")
     segments: Mapped[list["Segment"]] = relationship(

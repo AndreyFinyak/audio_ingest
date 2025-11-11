@@ -1,5 +1,7 @@
+from uuid import UUID
+
 from dependency_injector.wiring import Provide, inject
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import FileResponse
 
 from app.core.containers import Container
@@ -20,8 +22,8 @@ async def get_uploads(
 @router.get("/{upload_id}", response_model=AudioFileRead)
 @inject
 async def get_audio_info(
+    upload_id: UUID,
     audio_service: AudioService = Depends(Provide[Container.audio_service]),
-    upload_id: int = Query(..., ge=1),
 ):
     audio = await audio_service.get_audio_info(upload_id)
     if not audio:
@@ -29,11 +31,11 @@ async def get_audio_info(
     return audio
 
 
-@router.get("/{upload_id}/download", response_model=FileResponse)
+@router.get("/{upload_id}/download")
 @inject
 async def download_audio(
+    upload_id: UUID,
     audio_service: AudioService = Depends(Provide[Container.audio_service]),
-    upload_id: int = Query(..., ge=1),
 ):
     file_path = await audio_service.get_upload_file_path(upload_id)
     if not file_path:

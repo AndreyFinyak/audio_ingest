@@ -1,5 +1,6 @@
 import logging
 import os
+from uuid import UUID
 
 from sqlalchemy import select
 
@@ -28,13 +29,15 @@ class AudioService:
 
     @connection
     async def get_audio_info(
-        self, upload_id: int, session
+        self, upload_id: str, session
     ) -> AudioFileRead | None:
         """
         Возвращает информацию об обработанном аудиофайле
         (AudioFile + Segments).
         """
-        q_audio = select(AudioFile).where(AudioFile.upload_id == upload_id)
+        q_audio = select(AudioFile).where(
+            AudioFile.upload_id == UUID(upload_id)
+        )
         result = await session.execute(q_audio)
         audio = result.scalar_one_or_none()
         if not audio:
@@ -58,6 +61,8 @@ class AudioService:
         Возвращает путь к оригинальному файлу (для скачивания).
         """
         upload = await session.get(Upload, upload_id)
+        if not upload:
+            logger.warning("Upload %s not found", upload_id)
         if not upload:
             logger.warning("Upload %s not found", upload_id)
             return None

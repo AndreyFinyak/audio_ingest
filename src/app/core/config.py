@@ -21,6 +21,9 @@ class Settings(BaseSettings):
     DB_USER: str
     DB_PASS: str
 
+    PGADMIN_DEFAULT_EMAIL: str
+    PGADMIN_DEFAULT_PASSWORD: str
+
     model_config = SettingsConfigDict(env_file=".env")
 
     @property
